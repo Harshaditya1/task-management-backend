@@ -1,5 +1,7 @@
 package com.harsh.taskmanagement.service;
 
+import com.harsh.taskmanagement.dto.TaskRequestDto;
+import com.harsh.taskmanagement.dto.TaskResponseDto;
 import com.harsh.taskmanagement.entity.Task;
 import com.harsh.taskmanagement.repository.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -15,33 +17,64 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
+    public TaskResponseDto createTask(TaskRequestDto request) {
+
+        Task task = Task.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .completed(request.getCompleted() != null ? request.getCompleted() : false)
+                .build();
+
+        Task savedTask = taskRepository.save(task);
+
+        return mapToResponse(savedTask);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskResponseDto> getAllTasks() {
+        return taskRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
-    public Task getTaskById(Long id) {
-        return taskRepository.findById(id)
+
+    public TaskResponseDto getTaskById(Long id) {
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
-    }
-    public Task updateTask(Long id, Task updatedTask) {
 
-        Task existingTask = taskRepository.findById(id)
+        return mapToResponse(task);
+    }
+
+    public TaskResponseDto updateTask(Long id, TaskRequestDto request) {
+
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
 
-        existingTask.setTitle(updatedTask.getTitle());
-        existingTask.setDescription(updatedTask.getDescription());
-        existingTask.setCompleted(updatedTask.getCompleted());
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setCompleted(request.getCompleted());
 
-        return taskRepository.save(existingTask);
+        Task updatedTask = taskRepository.save(task);
+
+        return mapToResponse(updatedTask);
     }
+
     public void deleteTask(Long id) {
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
 
         taskRepository.delete(task);
+    }
+
+    private TaskResponseDto mapToResponse(Task task) {
+
+        return TaskResponseDto.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .completed(task.getCompleted())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .build();
     }
 }

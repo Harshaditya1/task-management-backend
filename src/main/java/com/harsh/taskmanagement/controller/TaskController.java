@@ -1,9 +1,10 @@
 package com.harsh.taskmanagement.controller;
 
-import com.harsh.taskmanagement.entity.Task;
+import com.harsh.taskmanagement.dto.TaskRequestDto;
+import com.harsh.taskmanagement.dto.TaskResponseDto;
 import com.harsh.taskmanagement.service.TaskService;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,29 +19,29 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task createTask(@Valid @RequestBody Task task) {
-        return taskService.createTask(task);
+    public TaskResponseDto createTask(@Valid @RequestBody TaskRequestDto request) {
+        return taskService.createTask(request);
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
+    public List<TaskResponseDto> getAllTasks() {
         return taskService.getAllTasks();
     }
+
     @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable Long id) {
+    public TaskResponseDto getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id);
     }
-    @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id,
-                           @Valid @RequestBody Task task) {
 
-        return taskService.updateTask(id, task);
+    @PutMapping("/{id}")
+    public TaskResponseDto updateTask(@PathVariable Long id,
+                                      @Valid @RequestBody TaskRequestDto request) {
+        return taskService.updateTask(id, request);
     }
+
     @DeleteMapping("/{id}")
     public String deleteTask(@PathVariable Long id) {
-
         taskService.deleteTask(id);
-
         return "Task deleted successfully.";
     }
 }
